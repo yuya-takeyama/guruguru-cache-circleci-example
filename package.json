@@ -1,0 +1,5 @@
+{
+  "name": "circleci_docker_cache_gem_example",
+  "private": true,
+  "dependencies": {}
+}
