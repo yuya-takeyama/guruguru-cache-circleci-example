@@ -16,15 +16,7 @@ WORKDIR /app
 COPY Gemfile /app
 COPY Gemfile.lock /app
 
-RUN guruguru-cache restore --s3-bucket=yuyat-guruguru-cache-example \
-  'gem-v1-{{ arch }}-{{ checksum "Gemfile.lock" }}' \
-  'gem-v1-{{ arch }}'
-
 RUN bundle install --path=vendor/bundle --clean
-
-RUN guruguru-cache store --s3-bucket=yuyat-guruguru-cache-example \
-  'gem-v1-{{ arch }}-{{ checksum "Gemfile.lock" }}' \
-  vendor/bundle
 
 COPY . /app
 
