@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    docker:
+       - image: circleci/ruby
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: restore gem cache
+          command: |
+            guruguru-cache restore --s3-bucket=yuyat-guruguru-cache-example \
+              'gem-v1-{{ arch }}-{{ checksum "Gemfile.lock" }}' \
+              'gem-v1-{{ arch }}'
+
+      - run:
+          name: install dependencies
+          command: |
+            bundle install --jobs=4 --retry=3 --path vendor/bundle --clean
+
+      - run:
+          name: restore gem cache
+          command: |
+            guruguru-cache restore --s3-bucket=yuyat-guruguru-cache-example \
+              'gem-v1-{{ arch }}-{{ checksum "Gemfile.lock" }}' \
+              'gem-v1-{{ arch }}'
+
+      - run:
+          name: build docker image
+          command: |
+            docker build . -t yuyat/guruguru-cache-circleci-example \
+              --build-arg aws_access_key_id="${AWS_ACCESS_KEY_ID}" \
+              --build-arg aws_secret_access_key="${AWS_SECRET_ACCESS_KEY}" \
+              --build-arg aws_region="${AWS_REGION}"
